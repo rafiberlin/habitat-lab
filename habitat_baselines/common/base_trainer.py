@@ -113,12 +113,18 @@ class BaseTrainer:
             else:
                 # evaluate multiple checkpoints in order
                 prev_ckpt_ind = -1
+                current_ckpt_none_counter = 0
                 while True:
                     current_ckpt = None
                     while current_ckpt is None:
                         current_ckpt = poll_checkpoint_folder(
                             self.config.EVAL_CKPT_PATH_DIR, prev_ckpt_ind
                         )
+                        if current_ckpt is None:
+                            current_ckpt_none_counter += 1
+                        if current_ckpt_none_counter == 10:
+                            logger.info("Nothing to eval anymore.")
+                            return
                         time.sleep(2)  # sleep for 2 secs before polling again
                     logger.info(f"=======current_ckpt: {current_ckpt}=======")
                     prev_ckpt_ind += 1
